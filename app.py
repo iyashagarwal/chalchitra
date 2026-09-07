@@ -90,7 +90,7 @@ def render_sidebar() -> tuple[str, str, str | None]:
         language = st.selectbox("Transcription mode", ["english", "hinglish"], format_func=lambda value: value.title())
         st.caption("Hinglish uses Sarvam AI translation. English runs locally with Whisper.")
         st.markdown("---")
-        st.caption("Powered by Whisper, Sarvam AI & Mistral")
+        st.caption("Powered by Whisper, Sarvam AI & Ollama")
 
     uploaded_file = st.file_uploader("", type=["mp4", "mov", "mkv", "avi", "mp3", "wav", "m4a"], label_visibility="collapsed")
     url = st.text_input("", placeholder="Paste a YouTube link", label_visibility="collapsed")

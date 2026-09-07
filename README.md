@@ -13,7 +13,7 @@ Long videos create an information-retrieval problem, not just a transcription pr
 - Converts YouTube links and uploaded media into normalized audio.
 - Supports English transcription with local Whisper inference.
 - Supports Hinglish transcription and English translation through Sarvam AI.
-- Uses Mistral-powered chains to produce meeting-ready outputs.
+- Uses a local Ollama model to produce meeting-ready outputs without a paid LLM API.
 - Builds a local Chroma vector store for transcript-grounded question answering.
 - Presents the results in a focused UI designed for quick scanning and follow-up.
 
@@ -43,15 +43,15 @@ flowchart TD
 	G -->|Hinglish| I[Sarvam AI speech-to-text translation]
 	H --> J[Complete transcript]
 	I --> J
-	J --> K[Mistral title and summary chains]
-	J --> L[Mistral extraction chains]
+	J --> K[Ollama title and summary chains]
+	J --> L[Ollama extraction chains]
 	L --> L1[Action items]
 	L --> L2[Key decisions]
 	L --> L3[Open questions]
 	J --> M[Chunk transcript and create embeddings]
 	M --> N[Persistent Chroma vector store]
 	N --> O[Retriever selects relevant context]
-	O --> P[Mistral grounded answer]
+	O --> P[Ollama grounded answer]
 	K --> Q[Streamlit insight workspace]
 	L1 --> Q
 	L2 --> Q
@@ -93,7 +93,7 @@ chalchitra/
 - **Python 3.10+** and **Streamlit** for the application runtime and UI.
 - **OpenAI Whisper** and **PyTorch** for local English speech recognition.
 - **Sarvam AI** for Hinglish speech-to-text translation.
-- **Mistral AI** through LangChain for summaries, metadata extraction, and chat.
+- **Ollama** through LangChain for local summaries, metadata extraction, and chat.
 - **Chroma** with **Hugging Face `all-MiniLM-L6-v2` embeddings** for local semantic retrieval.
 - **pydub**, **FFmpeg**, and **yt-dlp** for media acquisition and audio processing.
 
@@ -103,7 +103,7 @@ chalchitra/
 
 - Python 3.10 or newer.
 - FFmpeg installed and available on your system `PATH`.
-- A Mistral API key.
+- Ollama installed and running locally.
 - A Sarvam API key if Hinglish mode is required.
 
 On Windows, verify FFmpeg is available with:
@@ -138,12 +138,19 @@ pip install -r requirements.txt
 Create a `.env` file in the project root. Start from `.env.example`:
 
 ```env
-MISTRAL_API_KEY=your_mistral_api_key
+OLLAMA_MODEL=llama3.2:1b
+OLLAMA_BASE_URL=http://localhost:11434
 SARVAM_API_KEY=your_sarvam_api_key
 WHISPER_MODEL=small
 ```
 
-`SARVAM_API_KEY` is only needed for Hinglish mode. The Whisper model can be changed to another installed/downloadable model such as `base`, `medium`, or `large`, depending on the available hardware.
+Install Ollama from [ollama.com](https://ollama.com), start the Ollama service, and download the default model:
+
+```bash
+ollama pull llama3.2:1b
+```
+
+`SARVAM_API_KEY` is only needed for Hinglish mode. The Whisper model can be changed to another installed/downloadable model such as `base`, `medium`, or `large`, depending on the available hardware. `OLLAMA_MODEL` can be changed to any model available in your local Ollama installation.
 
 ### 5. Launch the application
 
@@ -172,7 +179,7 @@ English transcription runs locally through Whisper, which reduces dependency on 
 
 ### Grounded question answering
 
-The chat workflow splits the transcript into overlapping chunks, embeds them locally, retrieves the most relevant chunks for each question, and supplies only that context to the Mistral response chain. This makes the assistant useful for follow-up questions while reducing unsupported answers.
+The chat workflow splits the transcript into overlapping chunks, embeds them locally, retrieves the most relevant chunks for each question, and supplies only that context to the Ollama response chain. This makes the assistant useful for follow-up questions while reducing unsupported answers.
 
 ### Streamlit-first user experience
 
@@ -193,7 +200,7 @@ Do not commit `.env`, API keys, downloaded media, model caches, or generated vec
 - First runs can take longer because Whisper, embedding models, and PyTorch dependencies may need to initialize or download model files.
 - Processing time depends on video duration and the selected Whisper model.
 - FFmpeg must be installed separately; the Python package alone does not provide the FFmpeg executable.
-- Mistral is required for summaries, extracted insights, and transcript chat.
+- Ollama must be running locally for summaries, extracted insights, and transcript chat.
 - The current chat experience is scoped to the active transcript and is not designed as a multi-user persistence layer.
 
 ## Potential next steps
