@@ -36,7 +36,7 @@ def convert_to_wav(input_path: str) -> str:
 
 
 
-def chunk_audio(wav_path: str, chunk_length_ms: int = 60000) -> list:
+def chunk_audio(wav_path: str, chunk_length_ms: int = 300000) -> list:
     """Chunk the audio file into smaller segments."""
     audio = AudioSegment.from_wav(wav_path)
     chunks = []
@@ -62,4 +62,3 @@ def process_input(source: str) -> list:
     print(f"Audio ready — {len(chunks)} chunk(s) created.")
     return chunks
 
-process_input("https://www.youtube.com/watch?v=U49tCRSLavs")
